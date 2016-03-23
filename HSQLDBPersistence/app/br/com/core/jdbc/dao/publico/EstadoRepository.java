@@ -10,20 +10,20 @@ import java.util.List;
 
 public class EstadoRepository {
 
-	private Connection con = null;
+	private Connection conn = null;
 	private PreparedStatement pstmt = null;
 	private ResultSet rs = null;
 	private String sql = "";
 
-	public EstadoRepository(Connection con)  {
-		this.con = con;
+	public EstadoRepository(Connection conn)  {
+		this.conn = conn;
 	}
 
 	public EstadoTable findOne(Long id) {
 		EstadoTable obj = null;
 		sql = "SELECT id, nome, uf, pais FROM public.estado WHERE id=?";
 		try {
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, id);
 			rs = pstmt.executeQuery();
 			if(rs.next()){
@@ -50,7 +50,7 @@ public class EstadoRepository {
 		List<EstadoTable> resultado = new ArrayList<EstadoTable>();
 		sql = "SELECT id, nome, uf, pais FROM public.estado";
 		try {
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			while(rs.next()){
 				EstadoTable obj = new EstadoTable();
@@ -77,7 +77,7 @@ public class EstadoRepository {
 		List<EstadoTable> resultado = new ArrayList<EstadoTable>();
 		sql = "SELECT id, nome, uf, pais FROM public.estado  WHERE pais=?";
 		try {
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, pais);
 			rs = pstmt.executeQuery();
 			while(rs.next()){
@@ -105,7 +105,7 @@ public class EstadoRepository {
 		EstadoTable obj = null;
 		sql = "SELECT id, nome, uf, pais FROM public.estado  WHERE nome=?";
 		try {
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setString(1, nome);
 			rs = pstmt.executeQuery();
 			while(rs.next()){
@@ -135,7 +135,7 @@ public class EstadoRepository {
 
 		try{
 			String sqlId  = "call NEXT VALUE FOR public.estado_id_seq";
-			Statement stmt= con.createStatement();
+			Statement stmt= conn.createStatement();
 			rs = stmt.executeQuery(sqlId);
 			rs.next();
 			Long id =  new Long(rs.getInt(1));
@@ -144,7 +144,7 @@ public class EstadoRepository {
 			stmt.close();
 
 			sql = "INSERT INTO public.estado( id, nome, uf, pais) VALUES (?, ?, ?, ?)";
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, estadoTable.getId());
 			pstmt.setString(2, estadoTable.getNome());
 			pstmt.setString(3, estadoTable.getUf());
@@ -166,7 +166,7 @@ public class EstadoRepository {
 	private EstadoTable update(EstadoTable estadoTable) {
 		sql = "UPDATE public.estado  SET nome=?, uf=?, pais=? WHERE id=?";
 		try{
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setString(1, estadoTable.getNome());
 			pstmt.setString(2, estadoTable.getUf());
 			if(estadoTable.getPais()!=null){
@@ -186,7 +186,7 @@ public class EstadoRepository {
 	public void delete( Long id ) {
 		sql = "DELETE FROM public.estado WHERE id=?";
 		try{
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, id);
 			pstmt.executeUpdate();
 			pstmt.close();
@@ -198,7 +198,7 @@ public class EstadoRepository {
 	public void deleteByPaisPreserveIds(Long pais, String ids) {
 		sql = "DELETE FROM public.estado WHERE pais=? and id not in ("+ids+")";
 		try{
-			pstmt = (PreparedStatement) con.prepareStatement(sql);
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, pais);
 			pstmt.executeUpdate();
 			pstmt.close();

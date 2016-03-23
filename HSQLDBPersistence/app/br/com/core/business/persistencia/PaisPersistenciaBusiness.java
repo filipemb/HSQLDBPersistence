@@ -1,5 +1,6 @@
 package br.com.core.business.persistencia; 
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +11,22 @@ import br.com.core.modelo.publico.Pais;
 
 public class PaisPersistenciaBusiness {
 
-	PaisRepository paisRepository;
-	EstadoPersistenciaBusiness estadoPersistenciaBusiness;
+	private static PaisPersistenciaBusiness instance;
+	
+	private Connection conn;
+	private PaisRepository paisRepository;
 
+	private PaisPersistenciaBusiness(Connection conn){
+		this.conn=conn;
+		this.paisRepository=new PaisRepository(conn);
+	}
+	
+	public static PaisPersistenciaBusiness getInstance(Connection conn){
+		if(instance==null){
+			instance = new PaisPersistenciaBusiness(conn);
+		}
+		return instance;
+	}
 	
 	public Pais find(Long id){
 		return find(new Pais(id));
@@ -31,7 +45,7 @@ public class PaisPersistenciaBusiness {
 		if(pais!=null && pais.getId()!=null){
 			PaisTable paisTable  = paisRepository.findOne(pais.getId()); 
 			pais = PaisConversor.converterTabelaParaModelo(paisTable);
-			pais.setEstados(estadoPersistenciaBusiness.findByPaisCascade(pais));
+			pais.setEstados(EstadoPersistenciaBusiness.getInstance(conn).findByPaisCascade(pais));
 		}
 		return pais;
 	}
@@ -52,7 +66,7 @@ public class PaisPersistenciaBusiness {
 		List<PaisTable> all = paisRepository.findAll();
 		for(PaisTable itemTable : all){
 			Pais item =  PaisConversor.converterTabelaParaModelo(itemTable);
-			item.setEstados(estadoPersistenciaBusiness.findByPaisCascade(item));
+			item.setEstados(EstadoPersistenciaBusiness.getInstance(conn).findByPaisCascade(item));
 			retorno.add(item);
 		}
 		return retorno;
@@ -65,7 +79,7 @@ public class PaisPersistenciaBusiness {
 			PaisTable paisTable  = PaisConversor.converterModeloParaTabela(pais); 
 			paisRepository.save(paisTable);
 			pais.setId(paisTable.getId());
-			estadoPersistenciaBusiness.saveEstados(pais);
+			EstadoPersistenciaBusiness.getInstance(conn).saveEstados(pais);
 		}
 		return pais;
 
@@ -81,16 +95,16 @@ public class PaisPersistenciaBusiness {
 
 	
 	public void update(Pais pais){
-		estadoPersistenciaBusiness.deleteEstados(pais);
+		EstadoPersistenciaBusiness.getInstance(conn).deleteEstados(pais);
 		PaisTable paisTable  = PaisConversor.converterModeloParaTabela(pais); 
 		paisRepository.save(paisTable);
-		estadoPersistenciaBusiness.saveEstados(pais);
+		EstadoPersistenciaBusiness.getInstance(conn).saveEstados(pais);
 	}
 
 	
 	public void delete(Pais pais){
 		if(pais!=null && pais.getId()!=null){
-			estadoPersistenciaBusiness.delete(pais.getEstados());
+			EstadoPersistenciaBusiness.getInstance(conn).delete(pais.getEstados());
 			PaisTable paisTable  = PaisConversor.converterModeloParaTabela(pais); 
 			paisRepository.delete(paisTable.getId());
 		}

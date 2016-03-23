@@ -1,5 +1,6 @@
 package br.com.core.business.persistencia; 
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +13,22 @@ import br.com.core.modelo.publico.Pais;
 
 public class EstadoPersistenciaBusiness {
 
-	EstadoRepository estadoRepository;
-	MunicipioPersistenciaBusiness municipioPersistenciaBusiness;
-	PaisPersistenciaBusiness paisPersistenciaBusiness;
+	private static EstadoPersistenciaBusiness instance;
+	
+	private Connection conn;
+	private EstadoRepository estadoRepository;
+
+	private EstadoPersistenciaBusiness(Connection conn) {
+		this.conn=conn;
+		this.estadoRepository=new EstadoRepository(conn);
+	}
+	
+	public static EstadoPersistenciaBusiness getInstance(Connection conn){
+		if(instance==null){
+			instance = new EstadoPersistenciaBusiness(conn);
+		}
+		return instance;
+	}
 
 	public Estado find(Long id){
 		return find(new Estado(id));
@@ -24,7 +38,7 @@ public class EstadoPersistenciaBusiness {
 		if(estado!=null && estado.getId()!=null){
 			EstadoTable estadoTable  = estadoRepository.findOne(estado.getId()); 
 			estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
-			estado.setPais(paisPersistenciaBusiness.find(estado.getPais()));
+			estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
 		}
 		return estado;
 	}
@@ -33,8 +47,8 @@ public class EstadoPersistenciaBusiness {
 		if(estado!=null && estado.getId()!=null){
 			EstadoTable estadoTable  = estadoRepository.findOne(estado.getId()); 
 			estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
-			estado.setPais(paisPersistenciaBusiness.find(estado.getPais()));
-			estado.setMunicipios(municipioPersistenciaBusiness.findByEstadoCascade(estado));
+			estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
+			estado.setMunicipios(MunicipioPersistenciaBusiness.getInstance(conn).findByEstadoCascade(estado));
 		}
 		return estado;
 	}
@@ -44,7 +58,7 @@ public class EstadoPersistenciaBusiness {
 		for(EstadoTable estadoTable : estadoRepository.findByPais(pais.getId())){
 			Estado estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
 			estado.setPais(pais);
-			estado.setMunicipios(municipioPersistenciaBusiness.findByEstadoCascade(estado));
+			estado.setMunicipios(MunicipioPersistenciaBusiness.getInstance(conn).findByEstadoCascade(estado));
 			retorno.add(estado);
 		}
 		 return retorno;
@@ -55,7 +69,7 @@ public class EstadoPersistenciaBusiness {
 		List<EstadoTable> all = estadoRepository.findAll();
 		for(EstadoTable itemTable : all){
 			Estado item = EstadoConversor.converterTabelaParaModelo(itemTable);
-			item.setPais(paisPersistenciaBusiness.find(item.getPais()));
+			item.setPais(PaisPersistenciaBusiness.getInstance(conn).find(item.getPais()));
 			retorno.add(item);
 		}
 		 return retorno;
@@ -67,7 +81,7 @@ public class EstadoPersistenciaBusiness {
 			EstadoTable estadoTable  = EstadoConversor.converterModeloParaTabela(estado); 
 			estadoRepository.save(estadoTable);
 			estado.setId(estadoTable.getId());
-			municipioPersistenciaBusiness.saveMunicipios(estado);
+			MunicipioPersistenciaBusiness.getInstance(conn).saveMunicipios(estado);
 		}
 		return estado;
 	}
@@ -97,17 +111,17 @@ public class EstadoPersistenciaBusiness {
 
 	
 	public void update(Estado estado){
-		municipioPersistenciaBusiness.deleteMunicipios(estado);
+		MunicipioPersistenciaBusiness.getInstance(conn).deleteMunicipios(estado);
 		EstadoTable estadoTable  = EstadoConversor.converterModeloParaTabela(estado); 
 		estadoRepository.save(estadoTable);
-		municipioPersistenciaBusiness.saveMunicipios(estado);
+		MunicipioPersistenciaBusiness.getInstance(conn).saveMunicipios(estado);
 	}
 
 	
 	
 	public void delete(Estado estado){
 		if(estado!=null && estado.getId()!=null){
-			municipioPersistenciaBusiness.delete(estado.getMunicipios());
+			MunicipioPersistenciaBusiness.getInstance(conn).delete(estado.getMunicipios());
 			EstadoTable estadoTable  = EstadoConversor.converterModeloParaTabela(estado); 
 			estadoRepository.delete(estadoTable.getId());
 			//o objeto Pais nao serah removido junto

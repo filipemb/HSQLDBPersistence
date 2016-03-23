@@ -1,5 +1,6 @@
 package br.com.core.business.persistencia; 
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,9 +12,22 @@ import br.com.core.modelo.publico.Municipio;
 
 public class MunicipioPersistenciaBusiness {
 
-	MunicipioRepository municipioRepository;
-	EstadoPersistenciaBusiness estadoPersistenciaBusiness;
+	private static MunicipioPersistenciaBusiness instance;
+	
+	private Connection conn;
+	private MunicipioRepository municipioRepository;
 
+	private MunicipioPersistenciaBusiness(Connection conn){
+		this.municipioRepository = new MunicipioRepository(conn);
+		this.conn = conn;
+	}
+	
+	public static MunicipioPersistenciaBusiness getInstance(Connection conn){
+		if(instance==null){
+			instance = new MunicipioPersistenciaBusiness(conn);
+		}
+		return instance;
+	}
 	
 	public Municipio find(Long id){
 		return find(new Municipio(id));
@@ -23,7 +37,7 @@ public class MunicipioPersistenciaBusiness {
 		if(municipio!=null && municipio.getId()!=null){
 			MunicipioTable municipioTable  = municipioRepository.findOne(municipio.getId()); 
 			municipio = MunicipioConversor.converterTabelaParaModelo(municipioTable);
-			municipio.setEstado(estadoPersistenciaBusiness.find(municipio.getEstado()));
+			municipio.setEstado(EstadoPersistenciaBusiness.getInstance(conn).find(municipio.getEstado()));
 		}
 		return municipio;
 	}
@@ -43,7 +57,7 @@ public class MunicipioPersistenciaBusiness {
 		List<MunicipioTable> all = municipioRepository.findAll();
 		for(MunicipioTable itemTable : all){
 			Municipio item = find(itemTable.getId());
-			item.setEstado(estadoPersistenciaBusiness.find(item.getEstado()));
+			item.setEstado(EstadoPersistenciaBusiness.getInstance(conn).find(item.getEstado()));
 			 retorno.add(item);
 		}
 		 return retorno;

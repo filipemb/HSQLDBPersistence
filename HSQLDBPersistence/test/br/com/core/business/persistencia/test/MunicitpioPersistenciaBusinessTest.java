@@ -1,11 +1,11 @@
 package br.com.core.business.persistencia.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -15,6 +15,8 @@ import br.com.core.business.persistencia.MunicipioPersistenciaBusiness;
 import br.com.core.conversor.MunicipioConversor;
 import br.com.core.jdbc.pool.ConnectionPool;
 import br.com.core.jdbc.pool.DatabaseConfig;
+import br.com.core.json.utils.ConversorUtils;
+import br.com.core.modelo.publico.Estado;
 import br.com.core.modelo.publico.Municipio;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -37,66 +39,47 @@ public class MunicitpioPersistenciaBusinessTest {
 		pool.closeAllConnections();
 	}
 	
-	@Before
-	public void logPoolStatus(){
-		System.out.println(DatabaseConfig.getPool().toString());
+	@Test
+	public void test1find() {
+		Municipio municipio = municipioPersistenciaBusiness.find(5143l);
+		System.out.println(ConversorUtils.getJsonSerializer().prettyPrint(true).serialize(municipio));
+		assertTrue(true);
 	}
 	
 	@Test
-	public void test1findAll() {
+	public void test2findAll() {
 		for(Municipio municipio : municipioPersistenciaBusiness.findAll()){
 			System.out.println(MunicipioConversor.converterModeloParaJson(municipio));
 		}
 		assertTrue(true);
 	}
 
-//	@Test
-//	public void test2Update() {
-//		MunicipioTable municipioTable = municipioPersistenciaBusiness.findByNome("NOVO");
-//		municipioTable.setCapital(false);
-//		municipioPersistenciaBusiness.save(municipioTable);
-//		MunicipioTable municipioTableModificado = municipioPersistenciaBusiness.findOne(municipioTable.getId());
-//		assertEquals(false, municipioTableModificado.getCapital());
-//	}
-//
-//	@Test
-//	public void test3findOne() {
-//		MunicipioTable municipioTable = municipioPersistenciaBusiness.findByNome("NOVO");
-//		MunicipioTable municipioTableBusca = municipioPersistenciaBusiness.findOne(municipioTable.getId());
-//		assertEquals(municipioTableBusca.getId(), municipioTable.getId());
-//		assertEquals(municipioTableBusca.getCapital(), municipioTable.getCapital());
-//		assertEquals(municipioTableBusca.getNome(), municipioTable.getNome());
-//	}
-//
-//	@Test
-//	public void test4findByNome() {
-//		MunicipioTable municipioTable = municipioPersistenciaBusiness.findByNome("NOVO");
-//		MunicipioTable municipioTableBusca = municipioPersistenciaBusiness.findOne(municipioTable.getId());
-//		assertEquals(municipioTableBusca.getId(), municipioTable.getId());
-//		assertEquals(municipioTableBusca.getCapital(), municipioTable.getCapital());
-//		assertEquals(municipioTableBusca.getNome(), municipioTable.getNome());
-//	}
-//
-//	@Test
-//	public void test5findByEstado() {
-//		List<MunicipioTable> lista = municipioPersistenciaBusiness.findByEstado(10l);
-//		System.out.println("Lista tem o tamanho:"+lista.size());
-//		assertTrue(lista.size()>0);
-//	}
-//	
-//	@Test
-//	public void test6findAll() {
-//		List<MunicipioTable> lista = municipioPersistenciaBusiness.findAll();
-//		System.out.println("Lista tem o tamanho:"+lista.size());
-//		assertTrue(lista.size()>0);
-//	}
-//
-//	@Test
-//	public void test7Deletar() {
-//		MunicipioTable municipioTable = municipioPersistenciaBusiness.findByNome("NOVO");
-//		municipioPersistenciaBusiness.delete(municipioTable.getId());
-//		assertTrue(true);
-//	}
+	@Test
+	public void test3findByEstadoCascade() {
+		for(Municipio municipio : municipioPersistenciaBusiness.findByEstadoCascade(new Estado(20l))){
+			System.out.println(MunicipioConversor.converterModeloParaJson(municipio));
+		}
+		assertTrue(true);
+	}
+	
+	@Test
+	public void test4save() {
+		String json="{\n"+
+							" \"id\": \"\",\n"+
+							" \"nome\": \"Novo município em São Paulo\",\n"+
+							" \"capital\": false,\n"+
+							" \"estado\": {\n"+
+								" \"id\": \"33\"\n"+
+							" }\n"+
+						"}";
+		Municipio novoMunicipio = MunicipioConversor.converterJsonParaModelo(json);
+		municipioPersistenciaBusiness.save(novoMunicipio);
+		Municipio novo = municipioPersistenciaBusiness.find(novoMunicipio.getId());
+		assertEquals(novoMunicipio.getId(),novo.getId());
+		assertEquals(novoMunicipio.getNome(),novo.getNome());
+		assertEquals(novoMunicipio.getEstado().getId(),novo.getEstado().getId());
+	}
+
 	
 }
 

@@ -15,6 +15,7 @@ public class EstadoConversor {
 
 	public static EstadoTable converterModeloParaTabela(Estado modelo){
 
+		if(modelo == null) return null;
 		EstadoTable estadoTable = new EstadoTable();
 
 		estadoTable.setId(modelo.getId());
@@ -40,7 +41,7 @@ public class EstadoConversor {
 	}
 
 	public static Estado converterTabelaParaModelo(EstadoTable tabela){
-
+		if(tabela == null) return null;
 		Estado estado = new Estado();
 
 		Pais pais = new Pais();

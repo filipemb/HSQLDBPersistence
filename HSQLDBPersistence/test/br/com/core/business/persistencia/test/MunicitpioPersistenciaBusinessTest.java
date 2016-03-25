@@ -1,6 +1,7 @@
 package br.com.core.business.persistencia.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
@@ -79,6 +80,39 @@ public class MunicitpioPersistenciaBusinessTest {
 		assertEquals(novoMunicipio.getNome(),novo.getNome());
 		assertEquals(novoMunicipio.getEstado().getId(),novo.getEstado().getId());
 	}
+
+	@Test
+	public void test5update() {
+		String json="{\n"+
+				" \"id\": \""+municipioPersistenciaBusiness.findByNome("Novo município em São Paulo").getId()+"\",\n"+
+				" \"nome\": \"Novíssimo município em São Paulo\",\n"+
+				" \"capital\": true,\n"+
+				" \"estado\": {\n"+
+					" \"id\": \"33\"\n"+
+				" }\n"+
+			"}";
+		municipioPersistenciaBusiness.update(MunicipioConversor.converterJsonParaModelo(json));
+		Municipio atualizado = municipioPersistenciaBusiness.findByNome("Novíssimo município em São Paulo");
+		assertEquals(atualizado.getNome(),"Novíssimo município em São Paulo");
+		assertEquals(atualizado.getCapital(),true);
+	}
+	
+	@Test
+	public void test6delete() {
+		String json="{\n"+
+				" \"id\": \""+municipioPersistenciaBusiness.findByNome("Novíssimo município em São Paulo").getId()+"\",\n"+
+				" \"nome\": \"Novíssimo município em São Paulo\",\n"+
+				" \"capital\": true,\n"+
+				" \"estado\": {\n"+
+					" \"id\": \"33\"\n"+
+				" }\n"+
+			"}";
+		Municipio aDeletar = MunicipioConversor.converterJsonParaModelo(json);
+		municipioPersistenciaBusiness.delete(aDeletar);
+		assertNull(municipioPersistenciaBusiness.findByNome("Novíssimo município em São Paulo"));
+	}
+	
+
 
 	
 }

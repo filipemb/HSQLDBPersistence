@@ -14,6 +14,7 @@ public class MunicipioConversor {
 
 	public static MunicipioTable converterModeloParaTabela(Municipio modelo){
 
+		if(modelo==null) return null;
 		MunicipioTable municipioTable = new MunicipioTable();
 
 		municipioTable.setId(modelo.getId());
@@ -40,6 +41,7 @@ public class MunicipioConversor {
 
 	public static Municipio converterTabelaParaModelo(MunicipioTable tabela){
 
+		if(tabela == null) return null;
 		Municipio municipio = new Municipio();
 
 		Estado estado = new Estado();

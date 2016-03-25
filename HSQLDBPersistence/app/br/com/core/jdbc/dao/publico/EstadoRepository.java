@@ -47,11 +47,12 @@ public class EstadoRepository {
 
 	public List<EstadoTable> findAll() {
 
-		List<EstadoTable> resultado = new ArrayList<EstadoTable>();
+		List<EstadoTable> resultado = null;
 		sql = "SELECT id, nome, uf, pais FROM public.estado";
 		try {
 			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
+			if(rs.isBeforeFirst()) resultado = new ArrayList<EstadoTable>();
 			while(rs.next()){
 				EstadoTable obj = new EstadoTable();
 				obj.setId(rs.getLong("id"));
@@ -74,12 +75,13 @@ public class EstadoRepository {
 
 	public List<EstadoTable> findByPais(Long pais) {
 		
-		List<EstadoTable> resultado = new ArrayList<EstadoTable>();
+		List<EstadoTable> resultado = null;
 		sql = "SELECT id, nome, uf, pais FROM public.estado  WHERE pais=?";
 		try {
 			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, pais);
 			rs = pstmt.executeQuery();
+			if(rs.isBeforeFirst()) resultado = new ArrayList<EstadoTable>();
 			while(rs.next()){
 				EstadoTable obj = new EstadoTable();
 				obj.setId(rs.getLong("id"));

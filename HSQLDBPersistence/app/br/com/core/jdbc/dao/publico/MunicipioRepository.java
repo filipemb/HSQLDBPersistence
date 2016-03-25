@@ -47,11 +47,12 @@ public class MunicipioRepository {
 
 	public List<MunicipioTable> findAll() {
 
-		List<MunicipioTable> resultado = new ArrayList<MunicipioTable>();
+		List<MunicipioTable> resultado = null;
 		sql = "SELECT id, capital, nome, estado FROM public.municipio";
 		try {
 			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
+			if(rs.isBeforeFirst()) resultado = new ArrayList<MunicipioTable>();
 			while(rs.next()){
 				MunicipioTable obj = new MunicipioTable();
 				obj.setId(rs.getLong("id"));
@@ -74,12 +75,13 @@ public class MunicipioRepository {
 
 	public List<MunicipioTable> findByEstado(Long estado) {
 		
-		List<MunicipioTable> resultado = new ArrayList<MunicipioTable>();
+		List<MunicipioTable> resultado =null;
 		sql = "SELECT id, capital, nome, estado FROM public.municipio WHERE estado=?";
 		try {
 			pstmt = (PreparedStatement) conn.prepareStatement(sql);
 			pstmt.setLong(1, estado);
 			rs = pstmt.executeQuery();
+			if(rs.isBeforeFirst()) resultado = new ArrayList<MunicipioTable>();
 			while(rs.next()){
 				MunicipioTable obj = new MunicipioTable();
 				obj.setId(rs.getLong("id"));

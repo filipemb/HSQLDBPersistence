@@ -13,7 +13,7 @@ import br.com.core.modelo.publico.Municipio;
 public class MunicipioPersistenciaBusiness {
 
 	private static MunicipioPersistenciaBusiness instance;
-	
+
 	private Connection conn;
 	private MunicipioRepository municipioRepository;
 
@@ -21,46 +21,59 @@ public class MunicipioPersistenciaBusiness {
 		this.municipioRepository = new MunicipioRepository(conn);
 		this.conn = conn;
 	}
-	
+
 	public static MunicipioPersistenciaBusiness getInstance(Connection conn){
 		if(instance==null){
 			instance = new MunicipioPersistenciaBusiness(conn);
 		}
 		return instance;
 	}
-	
+
 	public Municipio find(Long id){
 		return find(new Municipio(id));
 	}
-	
+
 	public Municipio find(Municipio municipio){
-		if(municipio!=null && municipio.getId()!=null){
-			MunicipioTable municipioTable  = municipioRepository.findOne(municipio.getId()); 
-			municipio = MunicipioConversor.converterTabelaParaModelo(municipioTable);
-			municipio.setEstado(EstadoPersistenciaBusiness.getInstance(conn).find(municipio.getEstado()));
-		}
+		if(municipio==null || municipio.getId()==null) return null;
+		MunicipioTable municipioTable  = municipioRepository.findOne(municipio.getId()); 
+		if(municipioTable==null) return null;
+		municipio = MunicipioConversor.converterTabelaParaModelo(municipioTable);
+		municipio.setEstado(EstadoPersistenciaBusiness.getInstance(conn).find(municipio.getEstado()));
 		return municipio;
 	}
-	
+
+	public Municipio findByNome(String nome){
+		if(nome==null || nome.isEmpty()) return null;
+		MunicipioTable municipioTable  = municipioRepository.findByNome(nome); 
+		if(municipioTable==null) return null;
+		Municipio municipio = MunicipioConversor.converterTabelaParaModelo(municipioTable);
+		municipio.setEstado(EstadoPersistenciaBusiness.getInstance(conn).find(municipio.getEstado()));
+		return municipio;
+	}
+
 	public List<Municipio> findByEstadoCascade(Estado estado){
+		if(estado==null || estado.getId()==null) return null;
 		List<Municipio> retorno = new ArrayList<Municipio>();
-		for(MunicipioTable municipioTable : municipioRepository.findByEstado(estado.getId())){
+		List<MunicipioTable> allByEstado = municipioRepository.findByEstado(estado.getId());
+		if(allByEstado==null) return null;
+		for(MunicipioTable municipioTable : allByEstado ){
 			Municipio municipio = MunicipioConversor.converterTabelaParaModelo(municipioTable);
 			municipio.setEstado(estado);
 			retorno.add(municipio);
 		}
-		 return retorno;
+		return retorno;
 	}
 
 	public List<Municipio> findAll(){
 		List<Municipio> retorno = new ArrayList<Municipio>();
 		List<MunicipioTable> all = municipioRepository.findAll();
+		if(all==null) return null;
 		for(MunicipioTable itemTable : all){
 			Municipio item = find(itemTable.getId());
 			item.setEstado(EstadoPersistenciaBusiness.getInstance(conn).find(item.getEstado()));
-			 retorno.add(item);
+			retorno.add(item);
 		}
-		 return retorno;
+		return retorno;
 	}
 
 	public Municipio save(Municipio municipio){
@@ -87,20 +100,20 @@ public class MunicipioPersistenciaBusiness {
 			}
 		}
 	}
-	
+
 	public List<Municipio> save( List<Municipio> colecao){
 		List<Municipio> retorno = new ArrayList<Municipio>();
 		for(Municipio item : colecao){
-			 retorno.add(save(item));
+			retorno.add(save(item));
 		}
-		 return retorno;
+		return retorno;
 	}
 
 	public void update(Municipio municipio){
 		MunicipioTable municipioTable  = MunicipioConversor.converterModeloParaTabela(municipio); 
 		municipioRepository.save(municipioTable);
 	}
-	
+
 	public void delete(Municipio municipio){
 		if(municipio!=null && municipio.getId()!=null){
 			MunicipioTable municipioTable  = MunicipioConversor.converterModeloParaTabela(municipio); 
@@ -130,7 +143,7 @@ public class MunicipioPersistenciaBusiness {
 	public void delete( List<Municipio> colecao){
 		if(colecao!=null){
 			for(Municipio item : colecao){
-				 delete(item);
+				delete(item);
 			}
 		}
 	}

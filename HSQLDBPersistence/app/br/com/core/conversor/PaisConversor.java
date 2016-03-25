@@ -10,7 +10,7 @@ import flexjson.JSONSerializer;
 public class PaisConversor {
 
 	public static PaisTable converterModeloParaTabela(Pais modelo){
-
+		if(modelo == null) return null;
 		PaisTable paisTable = new PaisTable();
 
 		paisTable.setId(modelo.getId());
@@ -20,7 +20,7 @@ public class PaisConversor {
 	}
 
 	public static Pais converterTabelaParaModelo(PaisTable tabela){
-
+		if(tabela == null) return null;
 		Pais pais = new Pais();
 
 		pais.setId(tabela.getId());

@@ -14,7 +14,7 @@ import br.com.core.modelo.publico.Pais;
 public class EstadoPersistenciaBusiness {
 
 	private static EstadoPersistenciaBusiness instance;
-	
+
 	private Connection conn;
 	private EstadoRepository estadoRepository;
 
@@ -22,7 +22,7 @@ public class EstadoPersistenciaBusiness {
 		this.conn=conn;
 		this.estadoRepository=new EstadoRepository(conn);
 	}
-	
+
 	public static EstadoPersistenciaBusiness getInstance(Connection conn){
 		if(instance==null){
 			instance = new EstadoPersistenciaBusiness(conn);
@@ -33,46 +33,60 @@ public class EstadoPersistenciaBusiness {
 	public Estado find(Long id){
 		return find(new Estado(id));
 	}
-	
+
 	public Estado find(Estado estado){
-		if(estado!=null && estado.getId()!=null){
-			EstadoTable estadoTable  = estadoRepository.findOne(estado.getId()); 
-			estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
-			estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
-		}
+		if(estado==null || estado.getId()==null) return null;
+		EstadoTable estadoTable = estadoRepository.findOne(estado.getId()); 
+		if(estadoTable==null) return null;
+		estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
+		estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
 		return estado;
 	}
 
 	public Estado findCascaded(Estado estado){
-		if(estado!=null && estado.getId()!=null){
-			EstadoTable estadoTable  = estadoRepository.findOne(estado.getId()); 
-			estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
-			estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
-			estado.setMunicipios(MunicipioPersistenciaBusiness.getInstance(conn).findByEstadoCascade(estado));
-		}
+		if(estado==null || estado.getId()==null) return null;
+		EstadoTable estadoTable  = estadoRepository.findOne(estado.getId());
+		if(estadoTable==null) return null;
+		estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
+		estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
+		estado.setMunicipios(MunicipioPersistenciaBusiness.getInstance(conn).findByEstadoCascade(estado));
 		return estado;
 	}
 
 	public List<Estado> findByPaisCascade(Pais pais){
+		if(pais==null || pais.getId()==null) return null;
 		List<Estado> retorno = new ArrayList<Estado>();
-		for(EstadoTable estadoTable : estadoRepository.findByPais(pais.getId())){
+		List<EstadoTable> allByPais =estadoRepository.findByPais(pais.getId());
+		if(allByPais==null) return null;
+		for(EstadoTable estadoTable : allByPais){
 			Estado estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
 			estado.setPais(pais);
 			estado.setMunicipios(MunicipioPersistenciaBusiness.getInstance(conn).findByEstadoCascade(estado));
 			retorno.add(estado);
 		}
-		 return retorno;
+		return retorno;
+	}
+
+	public Estado findByNome(String nome){
+		if(nome==null || nome.isEmpty()) return null;
+		EstadoTable estadoTable = estadoRepository.findByNome(nome);
+		if(estadoTable==null) return null;
+		Estado estado = EstadoConversor.converterTabelaParaModelo(estadoTable);
+		estado.setPais(PaisPersistenciaBusiness.getInstance(conn).find(estado.getPais()));
+		estado.setMunicipios(MunicipioPersistenciaBusiness.getInstance(conn).findByEstadoCascade(estado));
+		return estado;
 	}
 
 	public List<Estado> findAll(){
 		List<Estado> retorno = new ArrayList<Estado>();
 		List<EstadoTable> all = estadoRepository.findAll();
+		if(all==null) return null;
 		for(EstadoTable itemTable : all){
 			Estado item = EstadoConversor.converterTabelaParaModelo(itemTable);
 			item.setPais(PaisPersistenciaBusiness.getInstance(conn).find(item.getPais()));
 			retorno.add(item);
 		}
-		 return retorno;
+		return retorno;
 	}
 
 	public Estado save(Estado estado){
@@ -100,16 +114,16 @@ public class EstadoPersistenciaBusiness {
 			}
 		}
 	}
-	
+
 	public List<Estado> save( List<Estado> colecao){
 		List<Estado> retorno = new ArrayList<Estado>();
 		for(Estado item : colecao){
-			 retorno.add(save(item));
+			retorno.add(save(item));
 		}
-		 return retorno;
+		return retorno;
 	}
 
-	
+
 	public void update(Estado estado){
 		MunicipioPersistenciaBusiness.getInstance(conn).deleteMunicipios(estado);
 		EstadoTable estadoTable  = EstadoConversor.converterModeloParaTabela(estado); 
@@ -117,8 +131,8 @@ public class EstadoPersistenciaBusiness {
 		MunicipioPersistenciaBusiness.getInstance(conn).saveMunicipios(estado);
 	}
 
-	
-	
+
+
 	public void delete(Estado estado){
 		if(estado!=null && estado.getId()!=null){
 			MunicipioPersistenciaBusiness.getInstance(conn).delete(estado.getMunicipios());
@@ -128,7 +142,7 @@ public class EstadoPersistenciaBusiness {
 		}
 	}
 
-	
+
 	public void deleteEstados(Pais pais){
 		String ids = "";
 		List<Estado> estados = pais.getEstados();
@@ -146,15 +160,15 @@ public class EstadoPersistenciaBusiness {
 			estadoRepository.deleteByPaisPreserveIds(pais.getId(), "-1");
 		}
 	}
-	
-	
+
+
 	public void delete( List<Estado> colecao){
 		if(colecao!=null){
 			for(Estado item : colecao){
-				 delete(item);
+				delete(item);
 			}
 		}
 	}
-	
+
 
 }

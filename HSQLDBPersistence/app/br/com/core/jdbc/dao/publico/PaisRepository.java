@@ -45,11 +45,12 @@ public class PaisRepository {
 
 	public List<PaisTable> findAll() {
 
-		List<PaisTable> resultado = new ArrayList<PaisTable>();
+		List<PaisTable> resultado =null;
 		sql = "SELECT id, nome, primeiro FROM public.pais";
 		try {
 			pstmt = (PreparedStatement) con.prepareStatement(sql);
 			rs = pstmt.executeQuery();
+			if(rs.isBeforeFirst()) resultado = new ArrayList<PaisTable>();
 			while(rs.next()){
 				PaisTable obj = new PaisTable();
 				obj.setId(rs.getLong("id"));

@@ -57,8 +57,8 @@ public class ConnectionPoolTest {
         pool = new ConnectionPool(null, URL, USER_NAME, PASSWORD,INITIAL_CONNECTIONS, MAX_CONNECTIONS, WAIT_IF_BUSY);
     }
  
-    @Test(expected = SQLException.class)
-    public void testDriverNotFound() throws SQLException {
+    @Test(expected = RuntimeException.class)
+    public void testDriverNotFound() throws RuntimeException {
         pool = new ConnectionPool("some.funky.driver", URL,USER_NAME, PASSWORD, INITIAL_CONNECTIONS, MAX_CONNECTIONS,WAIT_IF_BUSY);
     }
  
